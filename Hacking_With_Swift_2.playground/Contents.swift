@@ -399,3 +399,144 @@ let result = isUppercase(string)
 
 // ********** DAY 8 (Default values, throwing functions, and checkpoint 4) **********
 
+// Bitiş noktası sonda belirlenmiş bir fonksiyon:
+func printTimesTabless(for number: Int, end: Int) {
+    for i in 1...end {
+        print("\(i) x \(number) is \(i * number)")
+    }
+}
+printTimesTabless(for: 5, end: 20)
+
+// Bitiş noktası baştan belirlenmiş bir fonksiyon:
+func printTimesTablesss(for numberr: Int, end: Int = 12) {
+    for i in 1...end {
+        print("\(i) x \(numberr) is \(i * numberr)")
+    }
+}
+printTimesTablesss(for: 5, end: 20)
+printTimesTablesss(for: 8)
+
+// Bu, bir diziye bazı dizeler ekler, sayısını yazdırır, sonra hepsini kaldırır ve sayıyı tekrar yazdırır.
+var characters = ["Lana", "Pam", "Ray", "Sterling"]
+print(characters.count)
+characters.removeAll()
+print(characters.count)
+
+/* removeAll() işlevini çağırdığımızda, Swift otomatik olarak dizideki tüm öğeleri kaldıracak
+ ve ardından diziye atanmış olan tüm belleği boşaltacaktır.
+ Ancak bazen - sadece bazen - diziye çok sayıda yeni öğe eklemek üzere olabilirsiniz
+ ve bu nedenle bu işlevin öğeleri kaldırırken önceki kapasiteyi de koruyan ikinci bir biçimi vardır:
+*/
+characters.removeAll(keepingCapacity: true)
+/*
+ Bu, varsayılan bir parametre değeri kullanılarak gerçekleştirilir: keepingCapacity,
+ varsayılan değeri false olan bir Boolean'dır, böylece varsayılan olarak mantıklı olanı yapar
+ ve aynı zamanda dizinin mevcut kapasitesini korumak istediğimiz zamanlar için true'yu geçme seçeneğini açık bırakır.
+*/
+
+
+// Error Handling
+
+// Bu, parola ile ilgili iki olası hata olduğunu söylüyor: kısa ve açık. Bunların ne anlama geldiğini tanımlamıyor,
+// sadece var olduklarını söylüyor.
+enum PasswordError: Error {
+    case short, obvious
+}
+
+// İkinci adım, bu hatalardan birini tetikleyecek bir fonksiyon yazmaktır.
+func checkPassword(_ password: String) throws -> String {
+    if password.count < 5 {
+        throw PasswordError.short
+    }
+
+    if password == "12345" {
+        throw PasswordError.obvious
+    }
+
+    if password.count < 8 {
+        return "OK"
+    } else if password.count < 10 {
+        return "Good"
+    } else {
+        return "Excellent"
+    }
+}
+
+/*
+ # Eğer bir fonksiyon kendisi işlem yapmadan hata atabiliyorsa,
+ dönüş tipinden önce fonksiyonu throws olarak işaretlemeniz gerekir.
+ 
+ # Fonksiyon tarafından tam olarak ne tür bir hata atılacağını belirtmeyiz,
+ sadece hata atabileceğini belirtiriz.
+ 
+ # Throws ile işaretlenmiş olması, fonksiyonun hata vermesi gerektiği anlamına gelmez,
+ sadece hata verebileceği anlamına gelir.
+ 
+ # Bir hata atma zamanı geldiğinde, throw ve ardından PasswordError durumlarımızdan birini yazıyoruz.
+ Bu, fonksiyondan hemen çıkılmasını sağlar, yani bir String döndürmez.
+ 
+ # Herhangi bir hata atılmazsa, fonksiyon normal şekilde davranmalıdır - bir String döndürmesi gerekir.
+ Bu, hata fırlatmanın ikinci adımını tamamlar: meydana gelebilecek hataları tanımladık,
+ ardından bu hataları kullanan bir fonksiyon yazdık.
+
+ # Son adım ise fonksiyonu çalıştırmak ve oluşabilecek hataları ele almaktır.
+ Swift Playgrounds, çoğunlukla öğrenme amaçlı olduğu için hata işleme konusunda oldukça gevşektir,
+ ancak gerçek Swift projeleriyle çalışmak söz konusu olduğunda üç adım olduğunu göreceksiniz:
+*/
+
+
+/*
+do kullanarak hata fırlatabilecek bir iş bloğu başlatma.
+try kullanarak bir veya daha fazla fırlatma fonksiyonunu çağırma.
+catch kullanarak fırlatılan hataları işleme.
+Sözde kodda şu şekilde görünür:
+
+do {
+    try someRiskyWork()
+} catch {
+    print("Handle errors here")
+}
+*/
+
+// Eğer mevcut checkPassword() fonksiyonumuzu kullanarak bunu denemek isteseydik, şunu yazabilirdik:
+let string = "12345"
+
+do {
+    let result = try checkPassword(string)
+    print("Password rating: \(result)")
+} catch PasswordError.short {
+    print("Please use a longer password.")
+} catch PasswordError.obvious {
+    print("I have the same combination on my luggage!")
+} catch {
+    print("There was an error.")
+}
+
+// try: hata verebilecek tüm fonksiyonlar çağrılmadan önce yazılmalıdır ve geliştiricilere,
+// bir hata oluşması durumunda normal kod yürütmesinin kesintiye uğrayacağına dair görsel bir işarettir.
+
+/*
+ readItem() işlevi hata fırlatamaz, çünkü throws kullanılarak işaretlenmemiştir.
+ enum ArrayError: Error {
+     case negateIndex
+ }
+ func readItem(_ index: Int, from array: [String]) -> String {
+     if index < 0 {
+         throw ArrayError.negateIndex
+     }
+     return array[index]
+ }
+ */
+
+// *************************************** CHECKPOINT 4 ************************************************
+
+// Zorluk şu: 1'den 10.000'e kadar bir tamsayı kabul eden ve bu sayının tamsayı karekökünü döndüren bir fonksiyon yazın.
+
+/*
+ - Swift'in yerleşik sqrt() fonksiyonunu veya benzerini kullanamazsınız - karekökü kendiniz bulmanız gerekir.
+ - Eğer sayı 1'den küçük veya 10.000'den büyükse "sınırların dışında" hatası vermelisiniz.
+ - Yalnızca tamsayı kareköklerini dikkate almalısınız - örneğin 3'ün karekökünün 1,732 olması konusunda endişelenmeyin.
+ - Eğer karekökü bulamazsanız, "kök yok" hatası verin.
+ - Bir hatırlatma olarak, elinizde X sayısı varsa, X'in karekökü, kendisiyle çarpıldığında X'i veren başka bir sayı olacaktır.
+ - 9'un karekökü 3'tür, çünkü 3x3 9'dur ve 25'in karekökü 5'tir, çünkü 5x5 25'tir.
+ */
