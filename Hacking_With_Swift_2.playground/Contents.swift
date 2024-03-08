@@ -540,3 +540,78 @@ do {
  - Bir hatırlatma olarak, elinizde X sayısı varsa, X'in karekökü, kendisiyle çarpıldığında X'i veren başka bir sayı olacaktır.
  - 9'un karekökü 3'tür, çünkü 3x3 9'dur ve 25'in karekökü 5'tir, çünkü 5x5 25'tir.
  */
+
+enum SqrtError: Error {
+    case tooSmallNumber, tooBigNumber, noRoot
+}
+
+func mySqrt(_ number: Int) throws -> Int {
+    if number < 1 {
+        throw SqrtError.tooSmallNumber
+    }
+    
+    if number > 10000 {
+        throw SqrtError.tooBigNumber
+    }
+    
+    for i in 1...100 {
+        if number == i * i {
+            return i
+        }
+    }
+    throw SqrtError.noRoot
+}
+
+let number = 3
+do {
+    let result = try mySqrt(number)
+    print("Girdiğiniz sayının karekökü: \(result)")
+} catch SqrtError.tooSmallNumber {
+    print("Girdiğiniz sayı 1'den küçüktür.")
+} catch SqrtError.tooBigNumber {
+    print("Girdiğiniz sayı 10000'den büyüktür.")
+} catch SqrtError.noRoot {
+    print("Girdiğiniz sayının tam karekökü yoktur.")
+} catch {
+    print("Bilinmedik bir hatayla karşılaşıldı.")
+}
+
+// ***************************************************************************************************
+
+// ********** DAY 9 (Closures, passing functions into functions, and checkpoint 5) **********
+
+// Bir fonksiyonu kopyalarken, parantezleri ondan sonra yazmazsınız.
+// var greetCopy = greetUser olur, var greetCopy = greetUser() olmaz.
+// Parantezleri oraya koyarsanız, fonksiyonu çağırmış ve dönüş değerini başka bir şeye geri atamış olursunuz.
+func greetUser() {
+    print("Hi there!")
+}
+
+greetUser()
+
+var greetCopy = greetUser
+greetCopy()
+
+// Peki ya ayrı bir fonksiyon oluşturmayı atlamak ve fonksiyonu doğrudan bir sabite
+// veya değişkene atamak isterseniz? Bunu da yapabileceğiniz ortaya çıktı:
+let sayHello = {
+    print("Hi there!")
+}
+
+sayHello()
+// Swift buna closure expression ismini verir,
+// bu da bir closure oluşturduğumuzu söylemenin süslü bir yoludur.
+// Parametre almayan ve değer döndürmeyen bir fonksiyon.
+
+/*
+ Eğer closure'un parametre kabul etmesini istiyorsanız, bunların özel bir şekilde yazılması gerekir.
+ Gördüğünüz gibi, closure parantezlerle başlar ve biter, bu da parametreleri veya dönüş değerini
+ kontrol etmek için bu parantezlerin dışına kod koyamayacağımız anlamına gelir.
+ Bu yüzden, Swift'in güzel bir çözümü var: aynı bilgiyi parantezlerin içine koyabiliriz, bunun gibi:
+ */
+let sayHelloo = { (name: String) -> String in
+    "Hi \(name)!"
+}
+// Normal bir fonksiyonda parametreler ve dönüş tipi parantezlerin dışında gelirdi,
+// ancak bunu closure'larda yapamayız. Dolayısıyla, in parametre ve dönüş tipinin sonunu
+// işaretlemek için kullanılır, bundan sonraki her şey closure'un gövdesidir.
