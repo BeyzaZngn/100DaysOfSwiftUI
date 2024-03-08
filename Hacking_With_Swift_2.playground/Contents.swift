@@ -397,3 +397,5 @@ let result = isUppercase(string)
 */
 
 
+// ********** DAY 8 (Default values, throwing functions, and checkpoint 4) **********
+
