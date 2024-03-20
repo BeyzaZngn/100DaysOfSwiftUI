@@ -698,7 +698,6 @@ print(captainFirstTeam)
 let sayHhello = {
     print("Hi there!")
 }
-
 sayHhello()
 
 // Ayrıca, tıpkı captainFirstSorted() fonksiyonunu sorted() fonksiyonuna aktardığımız gibi,
