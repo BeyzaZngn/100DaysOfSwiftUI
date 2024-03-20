@@ -613,5 +613,149 @@ let sayHelloo = { (name: String) -> String in
     "Hi \(name)!"
 }
 // Normal bir fonksiyonda parametreler ve dönüş tipi parantezlerin dışında gelirdi,
-// ancak bunu closure'larda yapamayız. Dolayısıyla, in parametre ve dönüş tipinin sonunu
-// işaretlemek için kullanılır, bundan sonraki her şey closure'un gövdesidir.
+// ancak bunu closure'larda yapamayız. Dolayısıyla, in parametre ve
+// dönüş tipinin sonunu işaretlemek için kullanılır, bundan sonraki her şey closure'un gövdesidir.
+
+/*
+ 
+ greetUser() fonksiyonunu ele alalım: hiçbir parametre kabul etmez,
+ değer döndürmez ve hata fırlatmaz. Bunu greetCopy için
+ bir tür ek açıklaması olarak yazacak olsaydık, şunu yazardık:
+ 
+ Boş parantezler parametre almayan bir fonksiyonu işaret eder.
+ Ok, bir fonksiyon oluştururken ne anlama geliyorsa o anlama gelir:
+ fonksiyonun geri dönüş türünü bildirmek üzereyiz.
+ Void "hiçbir şey" anlamına gelir - bu fonksiyon hiçbir şey döndürmez.
+ Bazen bunun () şeklinde yazıldığını görebilirsiniz, ancak boş parametre
+ listesiyle karıştırılabileceği için genellikle bundan kaçınırız.
+ 
+ */
+var greetCopyy: () -> Void = greetUser
+
+/*
+ Her fonksiyonun türü aldığı ve geri gönderdiği verilere bağlıdır.
+ Bu kulağa basit gelebilir, ancak önemli bir püf noktasını gizler:
+ Aldığı verilerin adları fonksiyon türünün bir parçası değildir.
+ */
+func getUserData(for id: Int) -> String {
+    if id == 1989 {
+        return "Taylor Swift"
+    } else {
+        return "Anonymous"
+    }
+}
+
+let data: (Int) -> String = getUserData
+let usseer = data(1989)
+print(usseer)
+// Bir tamsayı kabul eden ve bir string döndüren bir fonksiyon.
+// Ancak fonksiyonun bir kopyasını aldığımızda, fonksiyon türü for harici parametre adını içermez,
+// bu nedenle kopya çağrıldığında data(for: 1989) yerine data(1989) kullanırız.
+
+// Aynı kural tüm closure'lar için de geçerlidir.
+// Daha önce yazdığımız sayHello closure'ını kullanmadığımı fark etmiş olabilirsiniz,
+// bunun nedeni çağrı yerinde bir parametre adının olmamasını sorgulamanıza neden olmak istemememdir. Şimdi onu çağıralım:
+// sayHello("Taylor")
+
+// Bu, tıpkı fonksiyonları kopyaladığımızda olduğu gibi parametre adı kullanmaz.
+// Yani, tekrar: harici parametre adları yalnızca bir fonksiyonu doğrudan çağırdığımızda önemlidir,
+// bir closure oluşturduğumuzda veya önce fonksiyonun bir kopyasını aldığımızda değil.
+
+// Bir dizinin elemanlarını sıralamak için sorted() fonksiyonunu kullandığımızı hatırlayalım.
+let team = ["Gloria", "Suzanne", "Piper", "Tiffany", "Tasha"]
+let sortedTeam = team.sorted()
+print(sortedTeam)
+
+/*
+ Ya bu sıralamayı kontrol etmek istersek ya her zaman bir kişinin takım kaptanı olduğu
+ için ilk sırada gelmesini ve diğerlerinin alfabetik olarak sıralanmasını istersek?
+
+ sorted() aslında tam olarak bunu kontrol etmek için özel bir sıralama fonksiyonu
+ geçirmemize izin verir. Bu fonksiyon iki dize kabul etmeli ve
+ ilk dizenin ikinciden önce sıralanması gerekiyorsa true,
+ ilk dizenin ikinciden sonra sıralanması gerekiyorsa false döndürmelidir.
+
+ Suzanne kaptan olsaydı, fonksiyon şöyle görünürdü:
+ */
+func captainFirstSorted(name1: String, name2: String) -> Bool {
+    if name1 == "Suzanne" {
+        return true
+    } else if name2 == "Suzanne" {
+        return false
+    }
+
+    return name1 < name2
+}
+
+// sorted() özel bir sıralama düzeni oluşturmak için bir fonksiyona aktarılabilir
+// ve bu fonksiyon a) iki dizgi kabul ettiği ve b) bir Boolean döndürdüğü sürece sorted() bunu kullanabilir.
+// Yeni captainFirstSorted() fonksiyonumuz tam olarak bunu yapıyor, bu yüzden onu hemen kullanabiliriz:
+let captainFirstTeam = team.sorted(by: captainFirstSorted)
+print(captainFirstTeam)
+
+// İlk olarak, closure'ları anonim fonksiyonlar olarak oluşturabilir,
+// sabitler ve değişkenler içinde saklayabiliriz:
+let sayHhello = {
+    print("Hi there!")
+}
+
+sayHhello()
+
+// Ayrıca, tıpkı captainFirstSorted() fonksiyonunu sorted() fonksiyonuna aktardığımız gibi,
+// fonksiyonları diğer fonksiyonlara da aktarabiliyoruz:
+// let captainFirstTeam = team.sorted(by: captainFirstSorted)
+
+/*
+ closure'ların gücü, bu ikisini bir araya getirebilmemizdir:
+ sorted() iki string kabul edecek ve bir Boolean döndürecek bir fonksiyon ister
+ ve bu fonksiyonun resmi olarak func kullanılarak mı oluşturulduğunu yoksa bir closure
+ kullanılarak mı sağlandığını umursamaz.
+ */
+
+// Bir closure kullanarak sorted() işlevini çağıran yeni bir kod yazalım:
+/*
+ 
+ let captainFirstTeam = team.sorted(by: { (name1: String, name2: String) -> Bool in
+ if name1 == "Suzanne" {
+ return true
+ } else if name2 == "Suzanne" {
+ return false
+ }
+ 
+ return name1 < name2
+ })
+ 
+ */
+
+// Hem closure'lar hem de fonksiyonlar parametre alabilir, ancak parametre alma şekilleri çok farklıdır.
+// İşte bir String ve bir tamsayı kabul eden bir fonksiyon:
+func pay(user: String, amount: Int) {
+    // code
+}
+// Burada da closure olarak yazılmış aynı şey var:
+let payment = { (user: String, amount: Int) in
+    // code
+}
+
+// Parametre almayan bir closure'dan nasıl değer döndürürsünüz?
+// İlk olarak, burada bir parametre kabul eden ve hiçbir şey döndürmeyen bir closure var:
+let payyment = { (user: String) in
+    print("Paying \(user)…")
+}
+
+// Şimdi bir parametre kabul eden ve bir Boolean döndüren bir closure var:
+let paymeent = { (user: String) -> Bool in
+    print("Paying \(user)…")
+    return true
+}
+
+// Herhangi bir parametre kabul etmeden bir değer döndürmek istiyorsanız,
+// sadece -> Bool yazamazsınız - Swift ne demek istediğinizi anlamayacaktır.
+// Bunun yerine, parametre listeniz için aşağıdaki gibi boş parantezler kullanmalısınız:
+let paymentt = { () -> Bool in
+    print("Paying an anonymous person…")
+    return true
+}
+// Eğer düşünürseniz, bu func payment() -> Bool yazabileceğiniz standart bir fonksiyonla aynı şekilde çalışır.
+
+
