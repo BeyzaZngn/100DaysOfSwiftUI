@@ -758,3 +758,230 @@ let paymentt = { () -> Bool in
 // Eğer düşünürseniz, bu func payment() -> Bool yazabileceğiniz standart bir fonksiyonla aynı şekilde çalışır.
 
 
+// Swift, closure'larla birlikte gelen sözdizimi(Syntax) miktarını azaltmak için birkaç hileye sahiptir,
+
+/*
+ 
+ Bu kodda sorted() fonksiyonuna verdiğimiz fonksiyon iki string sağlamalı ve bir Boolean döndürmelidir,
+ öyleyse neden closure da kendimizi tekrarlamamız gerekiyor?
+ 
+ let team = ["Gloria", "Suzanne", "Piper", "Tiffany", "Tasha"]
+
+ let captainFirstTeam = team.sorted(by: { (name1: String, name2: String) -> Bool in
+     if name1 == "Suzanne" {
+         return true
+     } else if name2 == "Suzanne" {
+         return false
+     }
+
+     return name1 < name2
+ })
+
+ print(captainFirstTeam)
+ 
+ Cevap: Gerekmiyor. İki parametremizin türünü belirtmemize gerek yok çünkü string olmalılar
+ ve dönüş türünü belirtmemize gerek yok çünkü Boolean olmalı. Böylece kodu şu şekilde yeniden yazabiliriz:
+ 
+ let captainFirstTeam = team.sorted(by: { name1, name2 in
+
+ Bu zaten koddaki karmaşa miktarını azalttı, ancak bir adım daha ileri gidebiliriz:
+ sorted() gibi bir işlev parametre olarak başka bir işlevi kabul ettiğinde,
+ Swift sondaki closure sözdizimi adı verilen özel sözdizimine izin verir. Bu şuna benzer:
+ 
+ let captainFirstTeam = team.sorted { name1, name2 in
+     if name1 == "Suzanne" {
+         return true
+     } else if name2 == "Suzanne" {
+         return false
+     }
+
+     return name1 < name2
+ }
+ closure' ı bir parametre olarak geçirmek yerine, devam edip closure' ı doğrudan başlatıyoruz
+ ve bunu yaparken (by: 'yi başlangıçtan ve closure parantezini sondan kaldırıyoruz.
+ 
+ Swift'in closure'ları daha az karmaşık hale getirmesinin son bir yolu daha var:
+ Swift, shorthand syntax kullanarak parametre adlarını bizim için otomatik olarak sağlayabilir.
+ Bu sözdizimi ile artık name1, name2 bile yazmıyoruz ve bunun yerine Swift'in bizim için sağladığı
+ özel olarak adlandırılmış değerlere güveniyoruz: sırasıyla birinci ve ikinci dizeler için $0 ve $1.
+ 
+ Bu sözdizimini kullanarak kodumuz daha da kısalır:
+ 
+ let captainFirstTeam = team.sorted {
+     if $0 == "Suzanne" {
+         return true
+     } else if $1 == "Suzanne" {
+         return false
+     }
+
+     return $0 < $1
+ }
+ 
+ Burada kullanmak gereksiz olabilir,
+ sorted() çağrımız daha basit olsaydı - örneğin, sadece ters sıralama yapmak isteseydik - o zaman kullanabilirdik:
+ let reverseTeam = team.sorted {
+     return $0 > $1
+ }
+ 
+ Yani, in parametre ve dönüş tipinin sonunu işaretlemek için kullanılır - bundan sonraki her şey closure'un gövdesidir.
+ 
+ Burada karşılaştırmayı <'den >'e çevirdim, böylece ters sıralama elde ettik,
+ ancak şimdi tek bir kod satırına indiğimiz için geri dönüşü kaldırabilir ve neredeyse sıfıra indirebiliriz:
+ let reverseTeam = team.sorted { $0 > $1 }
+
+ Kısaltılmış sözdiziminin (shorthand syntax) ne zaman kullanılacağı ve ne zaman kullanılmayacağı konusunda
+ sabit kurallar yoktur, ancak yardımcı olması durumunda, aşağıdakilerden herhangi biri doğru olmadıkça
+ kısaltılmış sözdizimini kullanırım:
+
+ 1) Kapanış kodu uzun.
+ 2) $0 ve arkadaşlarının her biri birden fazla kez kullanılır.
+ 3) Üç veya daha fazla parametre alırsınız (örn. $2, $3, vb.).
+ 
+ */
+
+// filter() fonksiyonu, dizideki her öğe üzerinde bazı kodlar çalıştırmamıza izin verir ve
+// fonksiyon için true döndüren her öğeyi içeren yeni bir dizi gönderir. Böylece,
+// adı T ile başlayan tüm takım oyuncularını şu şekilde bulabiliriz:
+let tOnly = team.filter { $0.hasPrefix("T") }
+print(tOnly)
+
+// map() fonksiyonu dizideki her öğeyi kendi seçtiğimiz bir kodu kullanarak dönüştürmemizi sağlar
+// ve dönüştürülmüş tüm öğelerden oluşan yeni bir dizi gönderir:
+let uppercaseTeam = team.map { $0.uppercased() }
+print(uppercaseTeam)
+
+// İpucu: map() ile çalışırken, döndürdüğünüz türün başladığınız türle aynı olması gerekmez,
+// örneğin bir tamsayı dizisini bir string dizisine dönüştürebilirsiniz.
+
+// Closure kullanım alanları:
+
+// Ekranda bir veri listesi oluşturduğunuzda, SwiftUI sizden listeden bir öğeyi kabul eden ve
+// onu ekranda görüntüleyebileceği bir şeye dönüştüren bir fonksiyon sağlamanızı isteyecektir.
+
+// Bir düğme oluşturduğunuzda, SwiftUI sizden düğmeye basıldığında çalıştırılacak bir fonksiyon ve
+// düğmenin içeriğini (bir resim veya bazı metinler vb.) oluşturacak başka bir fonksiyon sağlamanızı isteyecektir.
+
+// Sadece metin parçalarını dikey olarak üst üste koymak bile bir closure kullanılarak yapılır.
+
+// Closure ile ilgili son bir konuya daha değinmek istiyorum, o da diğer fonksiyonları parametre olarak kabul eden fonksiyonların nasıl yazılacağı.
+
+// Tip ek açıklamasını bilerek ekledim, çünkü fonksiyonları parametre olarak belirtirken tam olarak bunu kullanıyoruz:
+// Swift'e fonksiyonun hangi parametreleri kabul ettiğini ve dönüş tipini söylüyoruz.
+func makeArray(size: Int, using generator: () -> Int) -> [Int] {
+    var numbers = [Int]()
+
+    for _ in 0..<size {
+        let newNumber = generator()
+        numbers.append(newNumber)
+    }
+
+    return numbers
+}
+// Fonksiyonun adı makeArray(). Biri istediğimiz tamsayı sayısı olmak üzere iki parametre alır ve ayrıca bir tamsayı dizisi döndürür.
+// İkinci parametre bir fonksiyondur. Bu fonksiyonun kendisi parametre kabul etmez, ancak her çağrıldığında bir tamsayı döndürür.
+// makeArray() içinde yeni bir boş tamsayı dizisi oluştururuz, ardından istenildiği kadar döngü yaparız.
+// Döngü her döndüğünde, parametre olarak aktarılan generator fonksiyonunu çağırırız.
+// Bu, yeni bir tamsayı döndürecektir, bu yüzden bunu sayılar dizisine koyarız.
+// Son olarak bitmiş dizi döndürülür.
+
+// ******** Explanation ********
+/*
+ - Karmaşık kısım ilk satırdır:
+ 
+func makeArray(size: Int, using generator: () -> Int) -> [Int] {
+
+ - Burada iki parantez kümesi ve iki dönüş türü kümesi vardır,
+ bu nedenle ilk başta biraz karışık olabilir. Eğer bölerseniz doğrusal olarak okuyabilirsiniz:
+
+1- Yeni bir fonksiyon oluşturuyoruz.
+2- Fonksiyonun adı makeArray()'dir.
+3- İlk parametre "size" adı verilen bir tamsayıdır.
+4- İkinci parametre, kendisi parametre kabul etmeyen ve bir tamsayı döndüren generator adlı bir işlevdir.
+5- Her şey - makeArray() - bir tamsayı dizisi döndürür.
+
+- Sonuç olarak, artık her bir sayıyı oluşturmak için kullanılması gereken bir fonksiyonu
+ ileterek keyfi boyutta tamsayı dizileri oluşturabiliriz:
+
+ let rolls = makeArray(size: 50) {
+     Int.random(in: 1...20)
+ }
+
+ print(rolls)
+ 
+- Ve unutmayın, aynı işlevsellik özel fonksiyonlarla da çalışır, bu nedenle şöyle bir şey yazabiliriz:
+ 
+ func generateNumber() -> Int {
+     Int.random(in: 1...20)
+ }
+
+ let newRolls = makeArray(size: 50, using: generateNumber)
+ print(newRolls)
+ 
+- Bu, diziyi doldurmak için generateNumber() işlevini 50 kez çağıracaktır.
+*/
+
+
+// İsterseniz fonksiyonunuzun birden fazla fonksiyon parametresi almasını sağlayabilirsiniz,
+// bu durumda birden fazla sondaki closure belirtebilirsiniz. Buradaki sözdizimi SwiftUI'de çok yaygındır.
+// Bunu göstermek için, her biri parametre kabul etmeyen ve hiçbir şey döndürmeyen üç fonksiyon parametresi kabul eden bir fonksiyon:
+func doImportantWork(first: () -> Void, second: () -> Void, third: () -> Void) {
+    print("About to start first work")
+    first()
+    print("About to start second work")
+    second()
+    print("About to start third work")
+    third()
+    print("Done!")
+}
+// Birinci, ikinci ve üçüncü çağrılar arasında belirli bir işin yapıldığını simüle etmek için buraya fazladan print() çağrıları ekledim.
+// Bunu çağırmaya gelince, ilk sondaki kapatma zaten kullandığımızla aynıdır, ancak ikinci ve üçüncü farklı biçimlendirilir:
+// Önceki kapatmadan gelen parantezi bitirirsiniz, ardından harici parametre adını ve iki nokta üst üste işaretini yazarsınız,
+// ardından başka bir parantez başlatırsınız.
+doImportantWork {
+    print("This is the first work")
+} second: {
+    print("This is the second work")
+} third: {
+    print("This is the third work")
+}
+
+
+// *************************************** CHECKPOINT 5 ************************************************
+// sorted(), filter(), map() ile zaten tanıştınız, bu yüzden bunları bir zincir halinde bir araya getirmenizi istiyorum
+// - birini, sonra diğerini, sonra diğerini geçici değişkenler kullanmadan arka arkaya çağırın.
+// let luckyNumbers = [7, 4, 38, 21, 16, 15, 12, 33, 31, 49]
+
+// Çift olan tüm sayıları filtreleyin
+// Diziyi artan sırada sıralar.
+// Bunları "7 şanslı bir sayıdır" biçiminde stringlerle eşleyin.
+// Ortaya çıkan diziyi, her satırda bir öğe olacak şekilde yazdırın.
+// Yani, çıktınız aşağıdaki gibi olmalıdır:
+/*
+7 is a lucky number
+15 is a lucky number
+21 is a lucky number
+31 is a lucky number
+33 is a lucky number
+49 is a lucky number
+*/
+let luckyNumbers = [7, 4, 38, 21, 16, 15, 12, 33, 31, 49]
+
+// Filtreleme işlemi için closure
+let filteredNumbers = luckyNumbers.filter { number in
+    return number % 2 != 0
+}
+
+// Sıralama işlemi için closure
+let sortedNumbers = filteredNumbers.sorted()
+
+// Eşleme işlemi için closure
+let mappedNumbers = sortedNumbers.map { number in
+    return "\(number) is a lucky number"
+}
+
+// Yazdırma işlemi için closure
+mappedNumbers.forEach { string in
+    print(string)
+}
+// ******************************************************************************************************
+
