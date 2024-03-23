@@ -985,3 +985,383 @@ mappedNumbers.forEach { string in
 }
 // ******************************************************************************************************
 
+// ********** DAY 10 (Structs, computed properties, and property observers) **********
+
+// Basit bir struct (yapı) şu şekildedir:
+struct Album {
+    let title: String
+    let artist: String
+    let year: Int
+
+    func printSummary() {
+        print("\(title) (\(year)) by \(artist)")
+    }
+}
+
+// Bu noktada, Albüm tıpkı String veya Int gibidir - onları oluşturabilir, değer atayabilir,
+// kopyalayabilir ve benzeri işlemleri yapabiliriz. Örneğin, birkaç albüm oluşturabilir,
+// ardından bazı değerlerini yazdırabilir ve fonksiyonlarını çağırabiliriz:
+let red = Album(title: "Red", artist: "Taylor Swift", year: 2012)
+let wings = Album(title: "Wings", artist: "BTS", year: 2016)
+
+print(red.title)
+print(wings.artist)
+
+red.printSummary()
+wings.printSummary()
+
+/*
+
+Bu kod çalışmaz: Gördüğünüz gibi, let kullanarak bir çalışanı sabit olarak oluşturursak,
+Swift çalışanı ve tüm verilerini sabit hale getirir - fonksiyonları gayet iyi çağırabiliriz,
+ancak bu fonksiyonların yapının verilerini değiştirmesine izin verilmemelidir çünkü onu sabit hale getirdik.
+ 
+struct Employee {
+    let name: String
+    var vacationRemaining: Int
+
+    func takeVacation(days: Int) {
+        if vacationRemaining > days {
+            vacationRemaining -= days
+            print("I'm going on vacation!")
+            print("Days remaining: \(vacationRemaining)")
+        } else {
+            print("Oops! There aren't enough days remaining.")
+        }
+    }
+}
+ 
+*/
+
+/*
+ 
+*** Yalnızca veri okuyan tüm fonksiyonlar oldukları gibi iyidir,
+ancak struct'a ait verileri değiştirenler, bunun gibi özel bir mutating anahtar sözcüğü ile işaretlenmelidir:
+ 
+mutating func takeVacation(days: Int) {
+ 
+*** Artık kodumuz sorunsuz bir şekilde oluşturulacak, ancak Swift sabit yapılardan takeVacation() işlevini çağırmamızı engelleyecektir.
+ 
+ var archer = Employee(name: "Sterling Archer", vacationRemaining: 14)
+ archer.takeVacation(days: 5)
+ print(archer.vacationRemaining)
+ 
+*** Ancak var archer'ı let archer olarak değiştirirseniz Swift'in kodunuzu tekrar oluşturmayı reddettiğini göreceksiniz
+ - sabit bir yapı üzerinde mutasyona uğrayan bir fonksiyon çağırmaya çalışıyoruz, buna izin verilmiyor.
+ 
+*/
+
+// ============================================================================================
+// Structlara ait değişkenler ve sabitler özellik olarak adlandırılır.
+// Yapılara ait fonksiyonlara metot denir.
+// Bir struct'tan bir sabit veya değişken oluşturduğumuzda, buna örnek diyoruz.
+// - örneğin Album struct'ının bir düzine benzersiz örneğini oluşturabilirsiniz.
+// Yapıların örneklerini oluşturduğumuzda, bunu aşağıdaki gibi bir başlatıcı kullanarak yaparız:
+// Album(title: "Wings", artist: "BTS", year: 2016).
+// ============================================================================================
+
+// Swift struct'ın içinde init() adında özel bir fonksiyon yaratır ve struct'ın tüm özelliklerini
+// parametre olarak kullanır. Daha sonra otomatik olarak bu iki kod parçasını aynı olarak değerlendirir:
+struct Employee {
+    let name: String
+    var vacationRemaining: Int
+}
+var archer1 = Employee(name: "Sterling Archer", vacationRemaining: 14)
+var archer2 = Employee.init(name: "Sterling Archer", vacationRemaining: 14)
+
+// Swift, başlatıcısını oluşturma biçiminde akıllıdır, hatta bunları özelliklerimize atarsak varsayılan değerleri bile ekler.
+// Örneğin, yapımız şu iki özelliğe sahip olsaydı:
+let name: String
+var vacationRemaining = 14
+/*
+Ardından Swift, vacationRemaining için varsayılan değeri 14 olan bir başlatıcıyı sessizce oluşturacak ve her ikisini de geçerli kılacaktır:
+let kane = Employee(name: "Lana Kane")
+let poovey = Employee(name: "Pam Poovey", vacationRemaining: 35)
+*/
+
+// İpucu: Sabit bir özelliğe varsayılan bir değer atarsanız, bu değer başlatıcıdan tamamen kaldırılır.
+// Varsayılan bir değer atamak ancak gerektiğinde bunu geçersiz kılma olasılığını açık bırakmak için bir değişken özelliği kullanın.
+
+
+// Struct iki tür özelliğe sahip olabilir: stored property, yapının bir örneği içinde bir veri parçasını tutan bir değişken veya sabittir.
+// ve computed property, özelliğe her erişildiğinde özelliğin değerini dinamik olarak hesaplar.
+// Bu, hesaplanan(computed) özelliklerin hem saklanan(stored) özelliklerin hem de fonksiyonların bir karışımı olduğu anlamına gelir:
+// saklanan özellikler gibi erişilirler, ancak fonksiyonlar gibi çalışırlar.
+
+
+// Örnek olarak, daha önce o çalışan için kaç gün tatil kaldığını takip edebilen bir Çalışan yapımız vardı. İşte basitleştirilmiş bir versiyon:
+struct Empployee {
+    let name: String
+    var vacationRemaining: Int
+}
+
+var archer = Employee(name: "Sterling Archer", vacationRemaining: 14)
+archer.vacationRemaining -= 5
+print(archer.vacationRemaining)
+archer.vacationRemaining -= 3
+print(archer.vacationRemaining)
+
+/*
+ Bu önemsiz bir yapı olarak işe yarıyor, ancak değerli bilgileri kaybediyoruz.
+ Bu çalışana 14 günlük tatil atıyoruz, ardından günler alındıkça bunları çıkarıyoruz,
+ ancak bunu yaparken başlangıçta kaç gün verildiğini kaybediyoruz.
+ Bunu, hesaplanmış özelliği kullanmak için şu şekilde ayarlayabiliriz:
+*/
+struct Emppployee {
+    let name: String
+    var vacationAllocated = 14
+    var vacationTaken = 0
+
+    var vacationRemaining: Int {
+        vacationAllocated - vacationTaken
+    }
+}
+// Artık vacationRemaining' ı doğrudan atayabileceğimiz bir şey yapmak yerine,
+// ne kadar tatil yaptıklarını kendilerine ayrılan tatil miktarından çıkararak hesaplanıyor.
+
+/*
+vacationRemaining'den okuduğumuzda, normal bir depolanmış özellik (stored property) gibi görünür:
+ 
+var archer = Employee(name: "Sterling Archer", vacationAllocated: 14)
+archer.vacationTaken += 4
+print(archer.vacationRemaining)
+archer.vacationTaken += 4
+print(archer.vacationRemaining)
+ 
+ Bu gerçekten güçlü bir şey: bir özellik gibi görünen şeyi okuyoruz, ancak perde arkasında
+ Swift her seferinde değerini hesaplamak için bazı kodlar çalıştırıyor.
+ 
+ Yine de ona yazamayız çünkü Swift'e bunun nasıl ele alınması gerektiğini söylemedik.
+ Bunu düzeltmek için hem bir getter hem de bir setter sağlamamız gerekiyor.
+ Sırasıyla "okuyan kod" ve "yazan kod" için süslü isimler.
+*/
+
+/*
+ Bu durumda getter yeterince basittir, çünkü sadece mevcut kodumuzdur. Ancak setter daha ilginçtir.
+ Bir çalışan için vacationRemaining değerini ayarlarsanız, vacationAllocated değerinin artırılmasını
+ veya azaltılmasını mı istiyorsunuz, yoksa vacationAllocated aynı kalmalı ve bunun yerine vacationTaken değerini mi değiştirmeliyiz?
+ Bu ikisinden ilkinin doğru olduğunu varsayacağım, bu durumda property şu şekilde görünecektir:
+ 
+ var vacationRemaining: Int {
+ get {
+ vacationAllocated - vacationTaken
+ }
+ 
+ set {
+ vacationAllocated = vacationTaken + newValue
+ }
+ }
+ */
+
+// get ve set'in bir değeri okurken veya yazarken çalıştırılacak ayrı kod parçalarını nasıl işaretlediğine dikkat edin.
+// Daha da önemlisi, newValue'ya dikkat edin - bu bize Swift tarafından otomatik olarak sağlanır
+// ve kullanıcının özelliğe atamaya çalıştığı değeri saklar.
+
+/*
+Hem getter hem de setter'ı yerleştirdikten sonra, şimdi vacationRemaining'i değiştirebiliriz:
+ 
+var archer = Employee(name: "Sterling Archer", vacationAllocated: 14)
+archer.vacationTaken += 4
+archer.vacationRemaining = 5
+print(archer.vacationAllocated)
+*/
+
+// ====================================================================================================
+// Değeri değişmediğinde özelliği düzenli olarak okuyorsanız, stored property kullanmak
+// computed property kullanmaktan çok daha hızlı olacaktır. Öte yandan, özelliğiniz çok nadiren okunuyorsa
+// ve belki de hiç okunmuyorsa, computed property kullanmak sizi değerini hesaplamak
+// ve bir yerde saklamak zorunda kalmaktan kurtarır.
+// Bağımlılıklar söz konusu olduğunda - özelliğinizin değerinin diğer özelliklerinizin değerlerine bağlı olup olmadığı -
+// o zaman tablolar değişir: bu, computed property' nin yararlı olduğu bir yerdir, çünkü döndürdükleri değerin
+// her zaman en son program durumunu dikkate aldığından emin olabilirsiniz.
+// ====================================================================================================
+
+
+// Swift, özellikler değiştiğinde çalışan özel kod parçaları olan özellik gözlemcileri (property observers) oluşturmamıza izin verir.
+// Bunlar iki şekilde olabilir: özellik değiştiğinde çalışan didSet gözlemcisi ve özellik değişmeden önce çalışan willSet gözlemcisi.
+// Özellik gözlemcilerine neden ihtiyaç duyulabileceğini görmek için aşağıdaki gibi bir kod düşünün:
+struct Game {
+    var score = 0
+}
+
+var game = Game()
+game.score += 10
+print("Score is now \(game.score)")
+game.score -= 3
+print("Score is now \(game.score)")
+game.score += 1
+// Bu, bir Game struct oluşturur ve puanını birkaç kez değiştirir. Skor her değiştiğinde, bir print() satırı onu takip eder,
+// böylece değişiklikleri takip edebiliriz. Ancak bir hata var: sonunda skor yazdırılmadan değişiyor, bu bir hata.
+
+/*
+ 
+ Özellik gözlemcileri ile bu sorunu print() çağrısını didSet kullanarak doğrudan özelliğe ekleyerek çözebiliriz,
+ böylece her değiştiğinde - nerede değişirse değişsin - her zaman bazı kodlar çalıştırırız.
+ 
+struct Game {
+    var score = 0 {
+        didSet {
+            print("Score is now \(score)")
+        }
+    }
+}
+
+var game = Game()
+game.score += 10
+game.score -= 3
+game.score += 1
+
+*/
+
+// Eğer isterseniz, Swift otomatik olarak didSet içinde oldValue sabitini sağlar,
+// böylece neyi değiştirdiğinize bağlı olarak özel işlevselliğe sahip olmanız gerekir.
+// Ayrıca, özellik değişmeden önce bazı kodları çalıştıran bir willSet varyantı da vardır,
+// bu da buna dayalı olarak farklı bir işlem yapmak istemeniz durumunda atanacak yeni değeri sağlar.
+struct App {
+    var contacts = [String]() {
+        willSet {
+            print("Current value is: \(contacts)")
+            print("New value will be: \(newValue)")
+        }
+
+        didSet {
+            print("There are now \(contacts.count) contacts.")
+            print("Old value was \(oldValue)")
+        }
+    }
+}
+
+var app = App()
+app.contacts.append("Adrian E")
+app.contacts.append("Allen W")
+app.contacts.append("Ish S")
+// Evet, bir diziye ekleme yapmak hem willSet hem de didSet'i tetikleyecektir,
+// bu nedenle bu kod çalıştırıldığında çok sayıda metin yazdıracaktır.
+
+
+// Başlatıcı (initializer) sona erdiğinde tüm özelliklerin bir değeri olmalıdır.
+struct Player {
+    let name: String
+    let number: Int
+}
+
+let player = Player(name: "Megan R", number: 15)
+
+// Gelen parametrelerin adları ile atanan özelliklerin adları arasında ayrım yapmaya dikkat etmeniz gerekir.
+struct Playerr {
+    let name: String
+    let number: Int
+
+    init(name: String, number: Int) {
+        self.name = name
+        self.number = number
+    }
+}
+// "name parametresini name özelliğime ata" demek istediğimizi netleştirmek için özelliklere parametre atamak için self kullandım.
+
+// Elbette, özel başlatıcılarımızın Swift'in bize sağladığı varsayılan üye bazında başlatıcı gibi çalışması gerekmez.
+// Örneğin, bir oyuncu adı sağlamanız gerektiğini, ancak forma numarasının rastgele olduğunu söyleyebiliriz:
+struct Playeer {
+    let name: String
+    let number: Int
+
+    init(name: String) {
+        self.name = name
+        number = Int.random(in: 1...99)
+    }
+}
+
+let playeer = Playeer(name: "Megan R")
+print(playeer.number)
+
+// Altın kuralı unutmayın: başlatıcı sona erdiğinde tüm özellikler bir değere sahip olmalıdır.
+// Eğer başlatıcı içinde number için bir değer vermemiş olsaydık, Swift kodumuzu oluşturmayı reddedecekti.
+
+// How do Swift’s memberwise initializers work? (Swiftin üye bazında başlatıcıları nasıl çalışır?)
+// İlk olarak, özelliklerinizden herhangi biri varsayılan değerlere sahipse,
+// bunlar varsayılan parametre değerleri olarak başlatıcıya dahil edilecektir. Yani, eğer şöyle bir yapı oluşturursam:
+struct User {
+    var name: String
+    var yearsActive = 0
+}
+/*
+struct Employee {
+    var name: String
+    var yearsActive = 0
+}
+
+let roslin = Employee(name: "Laura Roslin")
+let adama = Employee(name: "William Adama", yearsActive: 45)
+*/
+
+/*
+ Swift'in yaptığı ikinci akıllıca şey, kendi initializer'ınızı oluşturduğunuzda memberwise initializer'ı kaldırmaktır.
+ Örneğin, anonim çalışanlar oluşturan özel bir başlatıcıya sahip olsaydım, şöyle görünürdü:
+ 
+ struct Employee {
+     var name: String
+     var yearsActive = 0
+     
+     init() {
+         self.name = "Anonymous"
+         print("Creating an anonymous employee…")
+     }
+ }
+ 
+ Bu durumda, artık memberwise initializer'a güvenemezdim, bu yüzden buna artık izin verilmeyecekti:
+ let roslin = Employee(name: "Laura Roslin")
+
+ Bu bir kaza değil, kasıtlı bir özelliktir: kendi başlatıcımızı oluşturduk ve Swift kendi üyeli başlatıcısını yerinde bırakırsa,
+ kendi başlatıcımıza koyduğumuz önemli çalışmayı kaçırabilir.
+
+ Bu nedenle, yapınız için özel bir başlatıcı eklediğiniz anda, varsayılan üyeli başlatıcı ortadan kalkar.
+ Eğer kalmasını istiyorsanız, özel başlatıcınızı aşağıdaki gibi bir uzantıya taşıyın:
+ 
+ struct Employee {
+     var name: String
+     var yearsActive = 0
+ }
+
+ extension Employee {
+     init() {
+         self.name = "Anonymous"
+         print("Creating an anonymous employee…")
+     }
+ }
+
+ // creating a named employee now works
+ let roslin = Employee(name: "Laura Roslin")
+
+ // as does creating an anonymous employee
+ let anon = Employee()
+ 
+ */
+
+// self'i kullanmanın en yaygın nedeni, parametre adlarının türünüzün özellik adlarıyla
+// eşleşmesini isteyeceğiniz bir başlatıcı içinde kullanmaktır:
+struct Student {
+    var name: String
+    var bestFriend: String
+
+    init(name: String, bestFriend: String) {
+        print("Enrolling \(name) in class…")
+        self.name = name
+        self.bestFriend = bestFriend
+    }
+}
+
+// Elbette bunu kullanmak zorunda değilsiniz, ancak parametre adlarına bir tür önek eklemek biraz beceriksizce olur:
+struct Studentt {
+    var name: String
+    var bestFriend: String
+
+    init(name studentName: String, bestFriend studentBestFriend: String) {
+        print("Enrolling \(studentName) in class…")
+        name = studentName
+        bestFriend = studentBestFriend
+    }
+}
+
+// Başlatıcıların dışında, self kullanmanın ana nedeni bir closure içinde olmamız ve
+// Swift'in ne olduğunu anladığımızdan emin olmak için bunu gerektirmesidir.
+// Bu yalnızca bir sınıfa ait bir closure içinden self'e erişirken gereklidir ve Swift bunu eklemediğiniz sürece kodunuzu oluşturmayı reddedecektir.
