@@ -351,4 +351,84 @@ helloTwo.name = "Taylor"
 helloTwo = HelloTwo()
 print(helloTwo.name)
 
+// *******************************************************************************************************
+
+// *********************************** CHECKPOINT 7 ******************************************************
+
+/*
+
+ Göreviniz şu: Hayvanlar için bir sınıf hiyerarşisi oluşturun, en üstte Hayvan ile başlayın,
+ sonra alt sınıflar olarak Köpek ve Kedi, sonra
+ Köpek'in alt sınıfları olarak Corgi ve Poodle ve Kedi'nin alt sınıfları olarak Persian ve Lion.
+
+ Ama dahası da var:
+
+ Animal sınıfı, hayvanın kaç bacağı olduğunu izleyen bir legs tamsayı özelliğine sahip olmalıdır.
+ Dog sınıfı, genel bir köpek havlaması dizesi yazdıran bir speak() yöntemine sahip olmalıdır, ancak alt sınıfların her biri biraz farklı bir şey yazdırmalıdır.
+ Kedi sınıfının yine her alt sınıfın farklı bir şey yazdırdığı eşleşen bir speak() yöntemi olmalıdır.
+ Kedi sınıfı, bir başlatıcı kullanılarak sağlanan isTame Boolean özelliğine sahip olmalıdır.
+ 
+*/
+
+class Animals {
+    let legs : Int
+    
+    init(legs: Int) {
+        self.legs = legs
+    }
+}
+
+class Dog : Animals {
+    func speak() {
+        print("haw")
+    }
+}
+
+class Corgi : Dog {
+    
+    override func speak() {
+        print("Wau Wau I am a Corgi and I have \(legs) legs")
+    }
+}
+
+class Poodle : Dog {
+    
+    override func speak() {
+        print("Wuff Wuff I am a Poodle and I have \(legs) legs")
+    }
+}
+
+class Cat : Animals {
+    
+    var isTame: Bool
+    
+    func speak() {
+        print("miaw")
+    }
+
+    init(legs: Int, isTame: Bool) {
+        self.isTame = isTame
+        super.init(legs: legs)
+    }
+}
+
+class Persian : Cat {
+    
+    override func speak() {
+        print("Miau Miau Cat \(legs) legs and isTame = \(isTame)")
+    }
+}
+
+class Lion : Cat {
+    
+    override func speak() {
+        print("Miz Miz I am a Cat with \(legs) legs and isTame = \(isTame)")
+    }
+}
+
+let random = Persian(legs: 8, isTame: true)
+random.speak()
+let random2 = Lion(legs: 4, isTame: false)
+random2.speak()
+
 
