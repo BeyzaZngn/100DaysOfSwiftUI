@@ -588,5 +588,252 @@ func getRandomBool() -> Equatable {
  
 */
 
+// (Extensions) Uzantılar nasıl oluşturulur ve kullanılır?
+// Herhangi bir türe işlevsellik eklememize olanak tanır.
+// Bunu göstermek için, stringler üzerinde trimmingCharacters(in:) kullanılır.
+var quote = "   The truth is rarely pure and never simple   "
 
+// Her iki taraftaki boşlukları ve yeni satırları kırpmak istersek, bunu şu şekilde yapabiliriz:
+let trimmed = quote.trimmingCharacters(in: .whitespacesAndNewlines)
+
+// .whitespacesAndNewlines değeri Apple'ın Foundation API'sinden geliyor ve aslında trimmingCharacters(in:) da öyle.
+// Her seferinde trimmingCharacters(in:) ifadesini çağırmak biraz fazla kelime içeriyor, bu yüzden bunu daha kısa hale getirmek için bir uzantı yazalım:
+extension String {
+    func trimmed() -> String {
+        self.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+}
+
+// Boşlukları ve satır sonlarını kaldırmak istediğimiz her yerde aşağıdakileri yazabiliriz:
+let trimmedd = quote.trimmed()
+
+// Bu biraz yazım tasarrufu sağladı, ancak normal bir fonksiyondan çok daha iyi mi? Gerçek şu ki, bu şekilde bir fonksiyon yazabilirdik:
+func trim(_ string: String) -> String {
+    string.trimmingCharacters(in: .whitespacesAndNewlines)
+}
+// Sonra bu şekilde kullandım:
+let trimmed2 = trim(quote)
+// Bu, hem işlevi oluşturma hem de kullanma açısından bir uzantı kullanmaktan daha az koddur.
+// Bu tür bir fonksiyona global fonksiyon denir, çünkü projemizin her yerinde kullanılabilir.
+
+/*
+ Uzantılar değerleri yerinde değiştirmeyi, yani yeni bir değer döndürmek yerine
+ bir değeri doğrudan değiştirmeyi kolaylaştırır. Örneğin, daha önce boşlukları ve yeni satırları kaldırılmış
+ yeni bir string döndüren bir trimmed() yöntemi yazmıştık, ancak stringi doğrudan değiştirmek istersek bunu uzantıya ekleyebiliriz:
+ 
+ mutating func trim() {
+ self = self.trimmed()
+ }
+ 
+ Tırnak stringi bir değişken olarak oluşturulduğundan, onu şu şekilde kırpabiliriz:
+ quote.trim()
+ 
+ Yöntemin şimdi nasıl biraz farklı adlandırıldığına dikkat edin: yeni bir değer döndürdüğümüzde trimmed() kullandık,
+ ancak stringi doğrudan değiştirdiğimizde trim() kullandık. Bu kasıtlıdır ve Swift'in tasarım yönergelerinin bir parçasıdır:
+ Eğer yeni bir değeri değiştirmek yerine geri döndürüyorsanız, reversed() gibi ed veya ing gibi kelime sonları kullanmalısınız.
+ 
+ */
+
+// Stringi tek tek satırlardan oluşan bir diziye ayıran lines adlı özellik vardır. Bu, stringi seçtiğimiz bir sınırda bölerek
+// bir string dizisine ayıran components(separatedBy:) adlı başka bir string yöntemini sarar. Bu durumda, bu sınırın yeni satırlar
+// olmasını isteriz, bu yüzden bunu string uzantımıza ekleriz:
+
+/*
+ 
+ var lines: [String] {
+    self.components(separatedBy: .newlines)
+}
+ 
+ Bunu uyguladıktan sonra artık herhangi bir dizenin lines özelliğini aşağıdaki gibi okuyabiliriz:
+ let lyrics = """
+ But I keep cruising
+ Can't stop, won't stop moving
+ It's like I got this music in my mind
+ Saying it's gonna be alright
+ """
+
+ print(lyrics.lines.count)
+ 
+*/
+
+// Daha önce Swift'in struct'lar için nasıl otomatik olarak üye bazında initializer oluşturduğunu görmüştünüz:
+struct Book {
+    let title: String
+    let pageCount: Int
+    let readingHours: Int
+}
+
+let lotr = Book(title: "Lord of the Rings", pageCount: 1178, readingHours: 24)
+
+// Özel bir başlatıcı, verileri bunun gibi bazı özel mantığa dayalı olarak atamak istediğimiz anlamına gelir:
+struct Bookk {
+    let title: String
+    let pageCount: Int
+    let readingHours: Int
+
+    init(title: String, pageCount: Int) {
+        self.title = title
+        self.pageCount = pageCount
+        self.readingHours = pageCount / 50
+    }
+}
+
+/*
+ 
+ Swift bu örnekte üyeye göre başlatıcıyı korusaydı, yaklaşık okuma süresini hesaplama mantığımızı atlayacaktı.
+ Bununla birlikte, bazen her ikisini de istersiniz - özel bir ilklendirici kullanma yeteneğine sahip olmak,
+ ancak aynı zamanda Swift'in otomatik üyeli ilklendiricisini korumak istersiniz. Bu durumda Swift'in tam olarak ne yaptığını
+ bilmek önemlidir: struct'ımızın içine özel bir ilklendirici uygularsak, Swift otomatik üyeli ilklendiriciyi devre dışı bırakır.
+
+ Bu ekstra küçük ayrıntı size bir sonraki adımda ne olacağına dair bir ipucu verebilir: bir uzantı içinde özel bir başlatıcı uygularsak, 
+ Swift otomatik üyeli başlatıcıyı devre dışı bırakmaz. Düşündüğünüzde bu mantıklı: eğer bir uzantının içine yeni bir başlatıcı eklemek
+ varsayılan başlatıcıyı da devre dışı bırakırsa, bizim yapacağımız küçük bir değişiklik diğer tüm Swift kodlarını bozabilir.
+
+ Bu nedenle, Book yapımızın varsayılan üyeli başlatıcının yanı sıra özel başlatıcımıza da sahip olmasını istiyorsak, 
+ özel olanı aşağıdaki gibi bir uzantıya yerleştiririz:
+
+ */
+
+extension Book {
+    init(title: String, pageCount: Int) {
+        self.title = title
+        self.pageCount = pageCount
+        self.readingHours = pageCount / 50
+    }
+}
+
+// How to create and use protocol extensions?
+// Bir dizinin içinde herhangi bir değer olup olmadığını kontrol eden bir koşul yazmak çok yaygındır, bunun gibi:
+let guests = ["Mario", "Luigi", "Peach"]
+
+if guests.isEmpty == false {
+    print("Guest count: \(guests.count)")
+}
+
+/*
+ Bazı insanlar Boolean ! operatörünü kullanmayı tercih eder, bunun gibi:
+ 
+ if !guests.isEmpty {
+     print("Guest count: \(guests.count)")
+ }
+ 
+ */
+
+// Bunu Array için aşağıdaki gibi gerçekten basit bir uzantı ile düzeltebiliriz:
+extension Array {
+    var isNotEmpty: Bool {
+        isEmpty == false
+    }
+}
+
+// Artık anlaşılması daha kolay olduğunu düşündüğüm bir kod yazabiliriz:
+if guests.isNotEmpty {
+    print("Guest count: \(guests.count)")
+}
+
+// Array, Set ve Dictionary'nin tümü Collection adı verilen yerleşik bir protokole uygundur 
+// ve bu protokol aracılığıyla contains(), sorted(), reversed() ve daha fazlası gibi işlevlere sahip olurlar.
+// Bu önemlidir, çünkü isEmpty özelliğinin var olmasını gerektiren şey de Collection'dır.
+// Dolayısıyla, Collection üzerine bir uzantı yazarsak, isEmpty özelliğine erişmeye devam edebiliriz çünkü
+// bu özellik gereklidir. Bu, bunu elde etmek için kodumuzda Array'i Collection olarak değiştirebileceğimiz anlamına gelir:
+extension Collection {
+    var isNotEmpty: Bool {
+        isEmpty == false
+    }
+}
+// Bu tek kelimelik değişiklikle artık isNotEmpty'yi diziler, kümeler ve sözlüklerin yanı sıra
+// Collection'a uyan diğer türlerde de kullanabiliyoruz.
+
+// Bir protokolde bazı gerekli yöntemleri listeleyebilir, ardından bunların varsayılan uygulamalarını bir protokol uzantısının içine ekleyebiliriz.
+// Tüm uyumlu tipler daha sonra bu varsayılan uygulamaları kullanabilir veya gerektiğinde kendi uygulamalarını sağlayabilir.
+// Örneğin, bunun gibi bir protokolümüz olsaydı:
+protocol Person {
+    var name: String { get }
+    func sayHello()
+}
+
+// Bu, tüm uyumlu türlerin bir sayHello() yöntemi eklemesi gerektiği anlamına gelir,
+// ancak bunun varsayılan bir uygulamasını da aşağıdaki gibi bir uzantı olarak ekleyebiliriz:
+extension Person {
+    func sayHello() {
+        print("Hi, I'm \(name)")
+    }
+}
+
+/* Ve artık uyumlu türler isterlerse kendi sayHello() yöntemlerini ekleyebilirler,
+ ancak buna gerek yoktur - her zaman protokol uzantımızın içinde sağlanan yönteme güvenebilirler.
+ Böylece, sayHello() yöntemi olmadan bir çalışan oluşturabiliriz:
+ 
+struct Employee: Person {
+    let name: String
+}
+
+Ancak Person ile uyumlu olduğu için, uzantımızda sağladığımız varsayılan uygulamayı kullanabiliriz:
+ 
+let taylor = Employee(name: "Taylor Swift")
+taylor.sayHello()
+
+*/
+
+// *******************************************************************************************************
+
+// *********************************** CHECKPOINT 8 ******************************************************
+
+/*
+ 
+ Göreviniz şu: bir binayı tanımlayan, çeşitli özellikler ve yöntemler ekleyen bir protokol oluşturun,
+ ardından buna uygun House ve Office adında iki yapı oluşturun. Protokolünüz aşağıdakileri gerektirmelidir:
+
+ Kaç odası olduğunu saklayan bir özellik.
+ Maliyeti tamsayı olarak saklayan bir özellik (örneğin, 500.000 $ maliyetli bir bina için 500.000.)
+ Binanın satışından sorumlu emlakçının adını saklayan bir özellik.
+ Binanın diğer özellikleriyle birlikte ne olduğunu açıklayan satış özetini yazdırmak için bir yöntem.
+ 
+ */
+protocol Building {
+    var room: Int { get }
+    var cost: Int { get }
+    var name: String { get }
+    func description()
+}
+
+struct House: Building {
+    var room: Int
+    var cost: Int
+    var name: String
+    
+    func description() {
+           print("Here we have a beautiful House with \(room) rooms. The price will be \(cost) Dollars and your agent is \(name)")
+       }
+}
+
+extension House {
+    init(room: Int, name: String) {
+        self.room = room
+        self.cost = room * 50_000
+        self.name = name
+    }
+}
+
+struct Office: Building {
+    var room: Int
+    var cost: Int
+    var name: String
+    
+    func description() {
+           print("Here we have a beautiful House with \(room) rooms. The price will be \(cost) Dollars and your agent is \(name)")
+       }
+}
+
+let house = House(room: 6, cost: 150_000, name: "Maxi")
+house.description()
+
+let office = Office(room: 2, cost: 50_000, name: "Maxi")
+office.description()
+
+let extHoues = House(room: 5, name: "Maxi")
+extHoues.description()
+
+// *******************************************************************************************************
+// ********** DAY 14 (Optionals, nil coalescing, and checkpoint 9) **********
 
