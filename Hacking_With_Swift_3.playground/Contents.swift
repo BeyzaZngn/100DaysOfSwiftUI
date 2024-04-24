@@ -431,4 +431,162 @@ random.speak()
 let random2 = Lion(legs: 4, isTame: false)
 random2.speak()
 
+// *******************************************************************************************************
+// ********** DAY 13 (Protocols, extensions, and checkpoint 8) **********
+
+// Protokoller Swift'teki sözleşmeler gibidir: bir veri türünün ne tür işlevleri desteklemesini beklediğimizi
+// tanımlamamızı sağlarlar ve Swift kodumuzun geri kalanının bu kurallara uymasını sağlar.
+
+func commute(distance: Int, using vehicle: Carr) {
+    // lots of code here
+}
+
+// Protokoller burada devreye girer: kullanmak istediğimiz bir dizi özellik ve yöntemi tanımlamamıza izin verirler.
+// Bu özellikleri ve yöntemleri uygulamazlar - aslında arkasına herhangi bir kod koymazlar - sadece özelliklerin ve
+// yöntemlerin var olması gerektiğini söylerler, tıpkı bir plan gibi.
+// Örneğin, aşağıdaki gibi yeni bir Araç protokolü tanımlayabiliriz:
+protocol Vehiclee {
+    func estimateTime(for distance: Int) -> Int
+    func travel(distance: Int)
+}
+// Protokolün içinde, bu protokolün beklediğimiz şekilde çalışması için ihtiyaç duyduğumuz tüm yöntemleri listeleriz.
+// Bu yöntemlerin içinde herhangi bir kod bulunmaz - burada sağlanan herhangi bir fonksiyon gövdesi yoktur.
+// Bunun yerine, yöntem adlarını, parametreleri ve dönüş türlerini belirtiyoruz. Gerekirse yöntemleri fırlatma(throwing) veya mutasyon(mutating) olarak da işaretleyebilirsiniz.
+
+// Protokol, var olması gereken tüm işlevselliği belirtmez, yalnızca asgari düzeyde bir işlevsellik belirtir.
+// Bu, protokole uygun yeni türler oluşturduğunuzda, gerektiğinde her türlü başka özellik ve yöntem ekleyebileceğiniz anlamına gelir.
+struct Carrr: Vehiclee {
+    func estimateTime(for distance: Int) -> Int {
+        distance / 50
+    }
+
+    func travel(distance: Int) {
+        print("I'm driving \(distance)km.")
+    }
+
+    func openSunroof() {
+        print("It's a nice day!")
+    }
+}
+
+// Şimdi bir protokol oluşturduk ve protokole uygun bir Car yapısı yaptık.
+// Bitirmek için, daha önceki commute() fonksiyonunu Car'a eklediğimiz yeni metotları kullanacak şekilde güncelleyelim:
+func commute(distance: Int, using vehicleee: Carrr) {
+    if vehicleee.estimateTime(for: distance) > 100 {
+        print("That's too slow! I'll try a different vehicle.")
+    } else {
+        vehicleee.travel(distance: distance)
+    }
+}
+
+let car = Carrr()
+commute(distance: 100, using: car)
+
+
+// Swift, Vehicle'a uyan herhangi bir türün hem estimateTime() hem de travel() yöntemlerini uygulaması gerektiğini bilir
+// ve bu nedenle aslında parametremizin türü olarak Car yerine Vehicle kullanmamıza izin verir. Fonksiyonu şu şekilde yeniden yazabiliriz:
+// func commute(distance: Int, using vehicle: Vehicle) {
+
+// Şimdi bu fonksiyonun, Vehicle protokolüne uygun olduğu sürece herhangi bir veri türüyle çağrılabileceğini söylüyoruz.
+// Swift, estimateTime() ve travel() yöntemlerinin var olduğundan emin olduğu için işlevin gövdesinin değişmesi gerekmez.
+
+/*
+struct Bicycle: Vehiclee {
+    func estimateTime(for distance: Int) -> Int {
+        distance / 10
+    }
+
+    func travel(distance: Int) {
+        print("I'm cycling \(distance)km.")
+    }
+}
+
+let bike = Bicycle()
+commute(distance: 50, using: bike)
+
+*/
+
+// Örneğin, Araç'a uyan tüm tiplerin kaç koltuğa sahip olduklarını ve şu anda kaç yolcuya sahip olduklarını
+// belirtmeleri gerektiğini şu şekilde belirtebiliriz:
+protocol Vehhicle {
+    var name: String { get }
+    var currentPassengers: Int { get set }
+    func estimateTime(for distance: Int) -> Int
+    func travel(distance: Int)
+}
+
+// Bir dizi araç kabul eden ve bunu bir dizi seçenek üzerinden tahminleri hesaplamak için kullanan bir yöntem yazabiliriz:
+func getTravelEstimates(using vehicles: [Vehhicle], distance: Int) {
+    for vehhicle in vehicles {
+        let estimate = vehhicle.estimateTime(for: distance)
+        print("\(vehhicle.name): \(estimate) hours to travel \(distance)km")
+    }
+}
+
+// Bir dizi Araç protokolünü kabul ediyoruz, bu da bir Araba, Bisiklet veya Araç'a uyan herhangi bir yapıyı aktarabileceğimiz
+// ve otomatik olarak çalışacağı anlamına geliyor:
+// getTravelEstimates(using: [car, bike], distance: 150)
+
+/*
+ Protokolleri parametre olarak kabul etmenin yanı sıra, gerekirse bir fonksiyondan protokolleri de döndürebilirsiniz.
+ İpucu: Sadece virgülle ayırarak tek tek listeleyerek istediğiniz kadar protokole uyabilirsiniz.
+ Bir şeyin alt sınıfını oluşturmanız ve bir protokole uymanız gerekirse, önce üst sınıf adını yazmalı, ardından protokollerinizi yazmalısınız.
+*/
+
+
+// opaque return types:
+
+func getRandomNumber() -> Int {
+    Int.random(in: 1...6)
+}
+
+func getRandomBool() -> Bool {
+    Bool.random()
+}
+
+/*
+ 
+ İpucu: Bool.random() işlevi doğru veya yanlış döndürür. Rastgele tamsayılar ve ondalık sayıların aksine,
+ özelleştirme seçenekleri olmadığı için herhangi bir parametre belirtmemiz gerekmez.
+
+ Böylece getRandomNumber() rastgele bir tamsayı ve getRandomBool() rastgele bir Boolean döndürür.
+
+ Hem Int hem de Bool, Equatable adı verilen ve "eşitlik için karşılaştırılabilir" anlamına gelen
+ ortak bir Swift protokolüne uygundur. Equatable protokolü, == ifadesini kullanmamızı sağlayan şeydir:
+
+ */
+
+print(getRandomNumber() == getRandomNumber())
+
+// Bu türlerin her ikisi de Equatable'a uygun olduğundan, fonksiyonumuzu Equatable değeri döndürecek şekilde değiştirmeyi deneyebiliriz:
+
+/*
+func getRandomNumber() -> Equatable {
+    Int.random(in: 1...6)
+}
+
+func getRandomBool() -> Equatable {
+    Bool.random()
+}
+ 
+"protokol 'Equatable' yalnızca genel bir kısıtlama olarak kullanılabilir çünkü Self veya ilişkili tür gereksinimleri vardır".
+ Swift'in hatasının anlamı, Equatable döndürmenin mantıklı olmadığıdır ve neden mantıklı olmadığını anlamak, opak dönüş türlerini anlamanın anahtarıdır.
+ 
+ Opak geri dönüş tipleri burada devreye girer: kodumuzdaki bilgileri gizlememize izin verirler, ancak Swift derleyicisinden gizlemezler.
+ Bu, kodumuzu dahili olarak esnek hale getirme hakkımızı saklı tuttuğumuz anlamına gelir, böylece gelecekte farklı şeyler döndürebiliriz,
+ ancak Swift her zaman döndürülen gerçek veri türünü anlar ve uygun şekilde kontrol eder.
+
+ İki fonksiyonumuzu opak dönüş tipine yükseltmek için, dönüş tiplerinden önce some anahtar sözcüğünü aşağıdaki gibi ekleyin:
+ 
+ func getRandomNumber() -> some Equatable {
+     Int.random(in: 1...6)
+ }
+
+ func getRandomBool() -> some Equatable {
+     Bool.random()
+ }
+ 
+*/
+
+
 
