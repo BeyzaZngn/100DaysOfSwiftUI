@@ -1112,3 +1112,4 @@ func getRandomNumberFromArray(_ input: [Int]?) -> Int { return input?.randomElem
 print(getRandomNumberFromArray(nil))
 print(getRandomNumberFromArray([0, 1]))
 
+
