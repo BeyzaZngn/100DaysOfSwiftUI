@@ -1048,5 +1048,67 @@ var bbook: Bbook? = nil
 let auuthor = bbook?.auuthor?.first?.uppercased() ?? "A"
 print(auuthor)
 
+// Opsiyonellerle fonksiyon hatası nasıl ele alınır?
 
+/*
+ 
+ Hata verebilecek bir fonksiyon çağırdığımızda, ya try kullanarak çağırırız ve hataları uygun şekilde ele alırız ya da
+ fonksiyonun başarısız olmayacağından eminsek try! kullanırız ve eğer yanılıyorsak kodumuzun çökeceğini kabul ederiz.
+ (Spoiler: try!'yi çok nadir kullanmalısınız.)
+ 
+ Bununla birlikte, bir alternatif vardır: tek önemsediğimiz fonksiyonun başarılı ya da başarısız olmasıysa,
+ fonksiyonun isteğe bağlı bir değer döndürmesini sağlamak için isteğe bağlı bir try (optional try) kullanabiliriz.
+ 
+ Fonksiyon herhangi bir hata vermeden çalıştıysa, isteğe bağlı değer geri dönüş değerini içerecektir,
+ ancak herhangi bir hata verildiyse fonksiyon nil değeri döndürecektir.
+ 
+ Bu, tam olarak hangi hatanın atıldığını bilemeyeceğimiz anlamına gelir, ancak genellikle bu iyidir,
+ sadece fonksiyonun çalışıp çalışmadığını önemseyebiliriz.
+ 
+ */
+
+enum UserError: Error {
+    case badID, networkFailed
+}
+
+func getUser(id: Int) throws -> String {
+    throw UserError.networkFailed
+}
+
+if let user = try? getUser(id: 23) {
+    print("User: \(user)")
+}
+
+// try? ile nil coalescing'i birleştirebilirsiniz, bu da "bu fonksiyondan geri dönüş değerini almaya çalışın,
+// ancak başarısız olursa bunun yerine bu varsayılan değeri kullanın" anlamına gelir.
+let user = (try? getUser(id: 23)) ?? "Anonymous"
+print(user)
+
+/*
+ 
+ Try? ifadesinin başlıca üç yerde kullanıldığını göreceksiniz:
+
+ * try? çağrısı nil döndürürse geçerli işlevden çıkmak için guard let ile birlikte.
+ * Bir şey denemek veya başarısızlık durumunda varsayılan bir değer sağlamak için nil coalescing ile birlikte.
+ * Geri dönüş değeri olmayan herhangi bir fırlatma fonksiyonunu çağırırken, başarılı olup olmamasını gerçekten önemsemediğinizde.
+ - örneğin, bir günlük dosyasına yazıyor veya bir sunucuya analiz gönderiyor olabilirsiniz.
+ 
+ */
+
+// *******************************************************************************************************
+
+// *********************************** CHECKPOINT 9 ******************************************************
+
+/*
+ 
+ isteğe bağlı bir tamsayı dizisini kabul eden ve rastgele bir tane döndüren bir işlev yazın.
+ Dizi eksik veya boşsa, 1 ile 100 aralığında rastgele bir sayı döndürün.
+ Fonksiyonunuzu tek bir kod satırında yazmanızı istiyorum. Hayır, bu sadece bir sürü kod yazıp sonra tüm satır sonlarını
+ kaldırmanız gerektiği anlamına gelmiyor - tüm bu şeyi tek bir kod satırında yazabilmelisiniz.
+ 
+ */
+
+func getRandomNumberFromArray(_ input: [Int]?) -> Int { return input?.randomElement() ?? Int.random(in: 1...100) }
+print(getRandomNumberFromArray(nil))
+print(getRandomNumberFromArray([0, 1]))
 
