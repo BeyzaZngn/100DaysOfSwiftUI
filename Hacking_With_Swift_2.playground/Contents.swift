@@ -1365,3 +1365,4 @@ struct Studentt {
 // Başlatıcıların dışında, self kullanmanın ana nedeni bir closure içinde olmamız ve
 // Swift'in ne olduğunu anladığımızdan emin olmak için bunu gerektirmesidir.
 // Bu yalnızca bir sınıfa ait bir closure içinden self'e erişirken gereklidir ve Swift bunu eklemediğiniz sürece kodunuzu oluşturmayı reddedecektir.
+
