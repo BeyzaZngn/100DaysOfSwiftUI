@@ -837,3 +837,216 @@ extHoues.description()
 // *******************************************************************************************************
 // ********** DAY 14 (Optionals, nil coalescing, and checkpoint 9) **********
 
+// Opsiyonellerle eksik veriler nasıl işlenir?
+// Swift'in öngörülebilirliği sağlamak için optionals adı verilen başka bir önemli yolu daha var.
+// "Bu şeyin bir değeri olabilir veya olmayabilir" anlamına gelen bir kelime.
+let opposites = [
+    "Mario": "Wario",
+    "Luigi": "Waluigi"
+]
+
+let peachOpposite = opposites["Peach"]
+// Burada iki anahtarlı bir [String: String] sözlüğü oluşturuyoruz: Mario ve Luigi.
+// Daha sonra, mevcut olmayan "Peach" anahtarına bağlı değeri okumaya çalışırız ve
+// eksik verilerin yerine geri gönderilecek varsayılan bir değer sağlamadık.
+// Swift'in çözümü optionals olarak adlandırılır, bu da mevcut olabilecek veya olmayabilecek veriler anlamına gelir.
+// Bunlar öncelikle veri türünüzden sonra bir soru işareti koyarak temsil edilir,
+// yani bu durumda peachOpposite bir String yerine bir String? olacaktır.
+
+/*
+ Bir String? kutusunun içinde bizi bekleyen bir string olabilir ya da hiçbir şey olmayabilir.
+ nil adı verilen ve "değer yok" anlamına gelen özel bir değer. Int, Double ve Bool'un yanı sıra enum,
+ struct ve sınıf örnekleri de dahil olmak üzere her türlü veri isteğe bağlı olabilir.
+ */
+
+// Swift bize opsiyonelleri açmak için iki temel yol sunar, ancak en çok göreceğiniz yol şuna benzer:
+if let marioOpposite = opposites["Mario"] {
+    print("Mario's opposite is \(marioOpposite)")
+}
+/*
+ Sözlükten isteğe bağlı değeri okur.
+ Opsiyonel değerin içinde bir string varsa, bu string açılır - yani içindeki string marioOpposite sabitine yerleştirilir.
+ Koşul başarılı oldu - isteğe bağlı değeri açabildik - bu nedenle koşulun gövdesi çalıştırılır.
+ Koşulun gövdesi yalnızca isteğe bağlı içinde bir değer varsa çalıştırılacaktır.
+ Elbette, bir else bloğu eklemek istiyorsanız ekleyebilirsiniz - bu sadece normal bir koşuldur, bu nedenle bu tür bir kodda sorun yoktur:
+ */
+
+var username: String? = nil
+
+if let unwrappedName = username {
+    print("We got a user: \(unwrappedName)")
+} else {
+    print("The optional was empty.")
+}
+
+/*
+ 
+ Opsiyoneller verilerin mevcut olabileceği veya olmayabileceği anlamına gelirken, opsiyonel olmayanlar normal dizeler, tam sayılar, vb
+ verilerin mevcut olması gerektiği anlamına gelir.
+ 
+ Eğer opsiyonel olmayan bir Int'imiz varsa, içinde kesinlikle bir sayı var demektir, her zaman. Bu sayı 1 milyon veya 0 gibi bir şey olabilir,
+ ancak yine de bir sayıdır ve mevcut olması garantidir. Buna karşılık, nil olarak ayarlanmış isteğe bağlı bir Int'in hiçbir değeri yoktur.
+ 0 veya başka bir sayı değildir, hiçbir şey değildir.
+ 
+ */
+
+/*
+ 
+İsteğe bağlı olmayan bir tamsayı gerektiren bir işleve isteğe bağlı bir tamsayı geçirmeye çalışırsanız bunu görebilirsiniz:
+func square(number: Int) -> Int {
+    number * number
+}
+
+var number: Int? = nil
+print(square(number: number))
+
+ Swift bu kodu oluşturmayı reddedecektir, çünkü isteğe bağlı tamsayının paketinin açılması gerekir.
+ İsteğe bağlı olmayan bir değerin gerekli olduğu yerde isteğe bağlı bir değer kullanamayız,
+ çünkü içinde değer olmasaydı bir sorunla karşılaşırdık.
+
+ Dolayısıyla, isteğe bağlı olanı kullanmak için önce onu şu şekilde açmalıyız:
+ 
+ if let unwrappedNumber = number {
+     print(square(number: unwrappedNumber))
+ }
+ 
+*/
+
+/*
+ Opsiyonelleri açarken, onları aynı isimde bir sabite açmak çok yaygındır. Swift'te buna tamamen izin verilir ve
+ unwrappedNumber veya benzeri sabitleri adlandırmaya devam etmemize gerek olmadığı anlamına gelir.
+
+ Bu yaklaşımı kullanarak, önceki kodu şu şekilde yeniden yazabiliriz:
+ 
+ if let number = number {
+     print(square(number: number))
+ }
+ 
+ */
+
+// Opsiyonelleri guard ile açma
+// opsiyonelleri kullanmanın ikinci bir yolu daha vardır ve neredeyse if let kadar yaygındır: guard let.
+func printSquare(of number: Int?) {
+    guard let number = number else {
+        print("Missing input")
+        return
+    }
+
+    print("\(number) x \(number) is \(number * number)")
+}
+// if let gibi, guard let de bir optional içinde bir değer olup olmadığını kontrol eder 
+//ve varsa değeri alır ve seçtiğimiz bir sabite yerleştirir.
+
+/*
+
+Ancak, bunu yapma şekli işleri tersine çevirir:
+ 
+var myVar: Int? = 3
+
+if let unwrapped = myVar {
+    print("Run if myVar has a value inside")
+}
+
+guard let unwrapped = myVar else {
+    print("Run if myVar doesn't have a value inside")
+}
+
+*/
+
+// if let, isteğe bağlı bir değere sahipse parantez içindeki kodu çalıştırır ve guard let,
+// isteğe bağlı bir değere sahip değilse parantez içindeki kodu çalıştırır.
+
+// Bir fonksiyonun girdilerinin geçerli olup olmadığını kontrol etmek için guard kullanırsanız, 
+// kontrol başarısız olursa Swift her zaman return kullanmanızı isteyecektir.
+// Kontrol başarılı olursa ve açtığınız opsiyonun içinde bir değer varsa, guard kodu bittikten sonra bunu kullanabilirsiniz.
+func printtSquare(of number: Int?) {
+    guard let number = number else {
+        print("Missing input")
+
+        // 1: We *must* exit the function here
+        return
+    }
+
+    // 2: `number` is still available outside of `guard`
+    print("\(number) x \(number) is \(number * number)")
+}
+/*
+ 
+ Yani: if let'i optional'ları açmak için kullanın, böylece onları bir şekilde işleyebilirsiniz ve 
+ guard let'i optional'ların içinde bir şey olduğundan emin olmak ve aksi takdirde çıkmak için kullanın.
+
+ İpucu: Opsiyonelleri açmayanlar da dahil olmak üzere herhangi bir koşulla guard kullanabilirsiniz.
+ Örneğin, guard someArray.isEmpty else { return } kullanabilirsiniz.
+ 
+ */
+
+// Swift'in opsiyonelleri açmak için üçüncü bir yolu mu var? Evet! nil birleştirme operatörü olarak adlandırılır ve
+// bir opsiyonu açmamızı ve opsiyon boşsa varsayılan bir değer sağlamamızı sağlar.
+let captains = [
+    "Enterprise": "Picard",
+    "Voyager": "Janeway",
+    "Defiant": "Sisko"
+]
+
+let new = captains["Serenity"]
+
+// Bu, captains sözlüğümüzde var olmayan bir anahtarı okur, yani new,
+// nil olarak ayarlanacak isteğe bağlı bir dize olacaktır.
+
+// ?? şeklinde yazılan nil birleştirme işleci ile, herhangi bir isteğe bağlı öğe için
+// aşağıdaki gibi varsayılan bir değer sağlayabiliriz:
+let neew = captains["Serenity"] ?? "N/A"
+// Bu tamamen aynı sonucu üretir, bu da nil birleştirme işlecinin anlamsız olduğunu düşündürebilir.
+// Ancak, nil birleştirme işleci yalnızca sözlüklerle değil, aynı zamanda tüm seçeneklerle de çalışır.
+let nnew = captains["Serenity", default: "N/A"]
+
+// Örneğin, dizilerdeki randomElement() yöntemi diziden rastgele bir öğe döndürür,
+// ancak boş bir dizi üzerinde çağırıyor olabileceğiniz için isteğe bağlı bir öğe döndürür. 
+// Bu nedenle, bir varsayılan sağlamak için nil birleştirme kullanabiliriz:
+let tvShows = ["Archer", "Babylon 5", "Ted Lasso"]
+let favorite = tvShows.randomElement() ?? "None"
+
+// Ya da belki de isteğe bağlı bir özelliğe sahip bir yapınız vardır ve eksik olduğunda mantıklı bir varsayılan sağlamak istiyorsunuzdur:
+struct Boookk {
+    let title: String
+    let author: String?
+}
+
+let book = Boookk(title: "Beowulf", author: nil)
+let author = book.author ?? "Anonymous"
+print(author)
+
+
+// Bir stringden bir tamsayı oluşturduğunuzda bile kullanışlıdır, burada aslında isteğe bağlı bir Int? geri alırsınız çünkü
+// dönüştürme başarısız olmuş olabilir - "Merhaba" gibi geçersiz bir tamsayı sağlamış olabilirsiniz. Burada, varsayılan bir değer
+// sağlamak için nil birleştirmeyi kullanabiliriz, bunun gibi:
+let input = ""
+let number = Int(input) ?? 0
+print(number)
+
+/* Gördüğünüz gibi, nil birleştirme operatörü, isteğe bağlı bir seçeneğiniz olan ve içindeki değeri kullanmak veya
+   eksikse varsayılan bir değer sağlamak istediğiniz her yerde kullanışlıdır.
+ */
+
+// Opsiyonel zincirleme kullanarak birden fazla opsiyonel nasıl işlenir?
+
+// Opsiyonel zincirleme, opsiyonellerin içindeki opsiyonelleri okumak için basitleştirilmiş bir sözdizimidir.
+let names = ["Arya", "Bran", "Robb", "Sansa"]
+
+let chosen = names.randomElement()?.uppercased() ?? "No one"
+print("Next in line: \(chosen)")
+
+
+// Yani, "eğer elimizde bir kitap varsa, kitabın bir yazarı varsa ve yazarın bir ilk harfi varsa,
+// o zaman büyük harfle yaz ve geri gönder, aksi takdirde A'yı geri gönder".
+struct Bbook {
+    let title: String
+    let auuthor: String?
+}
+
+var bbook: Bbook? = nil
+let auuthor = bbook?.auuthor?.first?.uppercased() ?? "A"
+print(auuthor)
+
+
+
