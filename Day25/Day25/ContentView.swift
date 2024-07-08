@@ -34,6 +34,7 @@ struct ContentView: View {
                 Text("Rock, Paper, Scissors")
                     .font(.largeTitle.weight(.bold))
                     .foregroundStyle(Color(red: 0.8, green: 0.7, blue: 0.45))
+                
                 Spacer(minLength: 5)
                 
                 Text("Score: \(score)")
