@@ -16,6 +16,7 @@ struct ContentView: View {
     @State private var alertTitle = ""
     @State private var alertMessage = ""
     @State private var showingAlert = false
+    @State private var recommendedBedtime = ""
     
     static var defaultWakeTime: Date {
         var components = DateComponents()
@@ -36,6 +37,7 @@ struct ContentView: View {
                     
                     DatePicker("Please enter a time", selection: $wakeUp, displayedComponents: .hourAndMinute)
                         .labelsHidden()
+                        .onChange(of: wakeUp) { calculateBedtime() }
                 }
 
                 VStack(alignment: .leading, spacing: 0) {
@@ -43,26 +45,38 @@ struct ContentView: View {
                         .font(.headline)
 
                     Stepper("\(sleepAmount.formatted()) hours", value: $sleepAmount, in: 4...12, step: 0.25)
+                        .onChange(of: sleepAmount) { calculateBedtime() }
                 }
                 
                 VStack(alignment: .leading, spacing: 0) {
-                    Text("Daily coffee intake")
+                    /* Text("Daily coffee intake")
                         .font(.headline)
-                    // Otomatik olarak cup, cups a dönüşür(Markdown ile ilgiliymiş.)
-                    Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
+                     Otomatik olarak cup, cups a dönüşür(Markdown ile ilgiliymiş.)
+                     Stepper("^[\(coffeeAmount) cup](inflect: true)", value: $coffeeAmount, in: 1...20)
+                    */
+                    Section {
+                        Picker("Daily coffee intake", selection: $coffeeAmount) {
+                            ForEach(1..<21) {
+                                Text("\($0) cup(s)")
+                            }
+                        }.font(.headline)
+                        .pickerStyle(.menu)
+                        .onChange(of: coffeeAmount) { calculateBedtime() }
+                    }
                 }
                 
-            }.padding()
+                VStack(alignment: .center) {
+                    Text("Your ideal bedtime is…")
+                        .font(.headline)
+                    Text(recommendedBedtime)
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                }
+                .frame(maxWidth: .infinity, alignment: .center)
+                
+            }
             .navigationTitle("BetterRest")
-                .toolbar {
-                    Button("Calculate", action: calculateBedtime)
-                }
-            
-                .alert(alertTitle, isPresented: $showingAlert) {
-                    Button("OK") { }
-                } message: {
-                    Text(alertMessage)
-                }
+            .onAppear(perform: calculateBedtime)
             
         }
     }
@@ -81,17 +95,14 @@ struct ContentView: View {
             
             let sleepTime = wakeUp - prediction.actualSleep
             
-            alertTitle = "Your ideal bedtime is…"
-            alertMessage = sleepTime.formatted(date: .omitted, time: .shortened)
+            recommendedBedtime = sleepTime.formatted(date: .omitted, time: .shortened)
 
             
         } catch {
             
-            alertTitle = "Error"
-            alertMessage = "Sorry, there was a problem calculating your bedtime."
+            recommendedBedtime = "Error calculating bedtime."
 
         }
-        showingAlert = true
         
     }
 }
@@ -100,3 +111,6 @@ struct ContentView: View {
     ContentView()
 }
 
+// onChange, SwiftUI’da kullanıcı etkileşimlerini dinleyip bunlara tepki vermek için kullanılan güçlü bir araçtır.
+// Bu fonksiyon, belirli bir değişkenin değerindeki değişiklikleri izleyerek belirli bir işlemi gerçekleştirmek için
+// idealdir. Bu sayede kullanıcı arayüzünde daha dinamik ve reaktif deneyimler sunabilirsiniz.
