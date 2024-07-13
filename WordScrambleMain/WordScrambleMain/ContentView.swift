@@ -17,9 +17,18 @@ struct ContentView: View {
     @State private var errorMessage = ""
     @State private var showingError = false
     
+    @State private var score = 0
+    
     var body: some View {
         
+        Spacer()
+        Spacer()
+        Spacer()
+        Spacer()
+        
         NavigationStack {
+        
+            Spacer()
             
             List {
                 Section {
@@ -35,10 +44,34 @@ struct ContentView: View {
                         }
                     }
                 }
+                
+                Text("Score: \(score)")
+                    .font(.title)
+                    .foregroundStyle(.brown)
+                    .padding()
             }
-            .navigationTitle(rootWord)
+            .toolbar {
+                
+                ToolbarItem(placement: .navigationBarLeading) {
+                    HStack {
+                        Text(rootWord)
+                            .font(.title)
+                            .padding(.leading)
+                        Spacer()
+                    }
+                }
+            
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button(action: startGame) {
+                        Text("Change")
+                            .foregroundStyle(.purple)
+                            .font(.title)
+                    }.padding(.trailing)
+                }
+            }
             // onSubmit() işlevine parametre kabul etmeyen ve hiçbir şey döndürmeyen bir işlev
             // verilmesi gerekir; bu da az önce yazdığımız addNewWord() yöntemiyle tam olarak eşleşir.
+            .navigationBarTitleDisplayMode(.inline)
             .onSubmit(addNewWord)
         }.onAppear(perform: startGame)
         
@@ -80,10 +113,23 @@ struct ContentView: View {
             return
         }
         
+        // Üç harften kısa olan cevaplara izin vermeyin.
+        guard isShort(word: answer) else {
+            wordError(title: "Word too short", message: "Words must be at least three letters long")
+            return
+        }
+
+        // Başlangıç kelimemiz olan cevaplara izin vermeyin.
+        guard isNotRootWord(word: answer) else {
+            wordError(title: "Word not allowed", message: "You can't use the start word")
+            return
+        }
+        
         withAnimation{
             usedWords.insert(answer, at: 0)
         }
         newWord = ""
+        scoreCount(for: answer) // Skoru güncellemek için fonksiyonu çağır.
         
     }
     
@@ -166,7 +212,29 @@ struct ContentView: View {
         errorMessage = message
         showingError = true
     }
-  
+    
+    //===============================================================================
+    // Üç harften kısa veya sadece başlangıç kelimemiz olan cevaplara izin vermeyin.
+    func isShort(word: String) -> Bool {
+        word.count >= 3
+    }
+    
+    func isNotRootWord(word: String) -> Bool {
+            word != rootWord
+    }
+    //=================================================================================
+    
+    //=================================================================================
+    // Skor hesaplamak için.
+    func scoreCount(for word: String) {
+        if word.count == 3 {
+            score += 1
+        } else if word.count > 3 {
+            score += 2
+        }
+    }
+    //=================================================================================
+
 }
 
 #Preview {
