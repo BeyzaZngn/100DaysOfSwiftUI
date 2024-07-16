@@ -30,7 +30,7 @@ struct ContentView: View {
             .clipShape(.rect(cornerRadius: enabled ? 60 : 0))
             .animation(.spring(duration: 1, bounce: 0.6), value: enabled)
             
-            Spacer()
+      
             
             LinearGradient(colors: [.yellow, .red], startPoint: .topLeading, endPoint: .bottomTrailing)
                        .frame(width: 300, height: 200)
@@ -77,13 +77,56 @@ struct ContentView: View {
                     .fill(.red)
                     .frame(width: 200, height: 200)
                     .transition(.asymmetric(insertion: .scale, removal: .opacity))
+                    .transition(.pivot)
             }
  
             
         }
         .padding()
+        
+        ZStack {
+            Rectangle()
+                .fill(.blue)
+                .frame(width: 200, height: 200)
+
+            if isShowingRed {
+                Rectangle()
+                    .fill(.red)
+                    .frame(width: 200, height: 200)
+                    .transition(.pivot)
+            }
+        }
+        .onTapGesture {
+            withAnimation {
+                isShowingRed.toggle()
+            }
+        }
+        
+        
     }
 }
+
+struct CornerRotateModifier: ViewModifier {
+    let amount: Double
+    let anchor: UnitPoint
+
+    func body(content: Content) -> some View {
+        content
+            .rotationEffect(.degrees(amount), anchor: anchor)
+            .clipped()
+    }
+    
+}
+
+extension AnyTransition {
+    static var pivot: AnyTransition {
+        .modifier(
+            active: CornerRotateModifier(amount: -90, anchor: .topLeading),
+            identity: CornerRotateModifier(amount: 0, anchor: .topLeading)
+        )
+    }
+}
+
 
 #Preview {
     ContentView()
